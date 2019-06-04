@@ -25,7 +25,7 @@ Board::Board(unsigned width, unsigned height, unsigned mines) {
 	for (i=0; i < height; i++) {
 		cells[i] = new Cell* [width];
 		for (j=0; j < width; j++)
-			cells[i][j] = new Cell(CELL_TYPE_FREE);
+			cells[i][j] = new Cell(j, i, CELL_TYPE_FREE);
 	}
 
 	// add mines at random on the map
@@ -126,19 +126,21 @@ void Board::show(void) {
 
 // Here is where most of the magic happens
 Cell* Board::revealCellAt(unsigned x, unsigned y) {
-	cells[y][x]->reveal();
+	this->cells[y][x]->reveal();
 
 	// game over, buddy
 	if (cells[y][x]->getType() == CELL_TYPE_MINE)
-		return cells[y][x];
+		return this->cells[y][x];
 
 	// if there are no mines around this cell
-	if (cells[y][x]->minesAround == 0) {
-		for (Cell* cell : getCellsAround(x, y))
-			cell->reveal();
+	if (this->cells[y][x]->minesAround == 0) {
+		for (Cell* cell : this->getCellsAround(x, y)) {
+			if (!cell->isRevealed())
+				this->revealCellAt(cell->getX(), cell->getY());
+		}
 	}
 
-	return cells[y][x];
+	return this->cells[y][x];
 }
 
 void Board::revealAllCells(void) {

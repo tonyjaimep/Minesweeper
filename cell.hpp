@@ -7,11 +7,15 @@ class Cell {
 	private:
 		bool revealed;
 		int type;
+		unsigned x;
+		unsigned y;
 	public:
 		unsigned minesAround;
-		Cell(int);
+		Cell(unsigned, unsigned, int);
 		void reveal(void);
 		int getType(void);
 		void setType(int);
 		bool isRevealed(void);
+		unsigned getX(void);
+		unsigned getY(void);
 };
