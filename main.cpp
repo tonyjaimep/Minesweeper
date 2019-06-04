@@ -18,7 +18,6 @@ int main(void) {
 		// reveal a cell
 		cout << "Enter the <row>, <column> to reveal: ";
 		scanf("%d, %d", &row, &column);
-		cout << "Revealing " << row << column << endl;
 		while (getchar() != '\n');
 		if (board.revealCellAt(column - 1, row - 1)->getType() == CELL_TYPE_MINE) {
 			printf("You lost!\n");
