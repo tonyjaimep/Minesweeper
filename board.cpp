@@ -143,6 +143,18 @@ Cell* Board::revealCellAt(unsigned x, unsigned y) {
 	return this->cells[y][x];
 }
 
+bool Board::isSolved(void) {
+	unsigned i;
+	unsigned j;
+
+	for (i=0; i < this->height; i++)
+		for (j=0; j < this->width; j++)
+			if (cells[i][j]->getType() == CELL_TYPE_FREE && !cells[i][j]->isRevealed())
+				return false;
+
+	return true;
+}
+
 void Board::revealAllCells(void) {
 	unsigned i;
 	unsigned j;

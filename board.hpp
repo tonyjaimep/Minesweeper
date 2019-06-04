@@ -17,5 +17,6 @@ class Board {
 		void show(void);
 		vector<Cell*> getCellsAround(unsigned, unsigned);
 		void revealAllCells(void);
+		bool isSolved(void);
 		~Board(void);
 };

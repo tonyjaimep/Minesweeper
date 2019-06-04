@@ -10,11 +10,11 @@ int main(void) {
 	unsigned column;
 
 	//	create a board
-	Board board = Board(5, 5, 3);
+	Board board = Board(9, 9, 5);
 	board.show();
 
 	// game loop
-	while (true) {
+	while (!board.isSolved()) {
 		// reveal a cell
 		cout << "Enter the <row>, <column> to reveal: ";
 		scanf("%d, %d", &row, &column);
