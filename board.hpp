@@ -1,7 +1,9 @@
 #pragma once
 
 #include "cell.hpp"
-#include <array>
+#include <vector>
+
+using namespace std;
 
 class Board {
 	private:
@@ -13,6 +15,7 @@ class Board {
 		Board(unsigned, unsigned, unsigned);
 		Cell* revealCellAt(unsigned, unsigned);
 		void show(void);
+		vector<Cell*> getCellsAround(unsigned, unsigned);
 		void revealAllCells(void);
 		~Board(void);
 };

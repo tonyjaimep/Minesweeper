@@ -1,12 +1,17 @@
 #include <iostream>
+#include <vector>
 #include "board.hpp"
 #include "cell.hpp"
 
 using namespace std;
 
-Board::Board(unsigned width, unsigned height, unsigned bombs) {
+Board::Board(unsigned width, unsigned height, unsigned mines) {
+	// for setting cells
 	unsigned i;
 	unsigned j;
+	// for setting mines
+	unsigned x;
+	unsigned y;
 
 	this->width = width;
 	this->height = height;
@@ -15,25 +20,51 @@ Board::Board(unsigned width, unsigned height, unsigned bombs) {
 	srand(time(NULL));
 
 	// initialize cells
-	cells = new Cell** [width];
+	cells = new Cell** [height];
 
-	for (i=0; i < width; i++) {
+	for (i=0; i < height; i++) {
 		cells[i] = new Cell* [width];
-		for (j=0; j < height; j++)
-			cells[i][j] = NULL;
+		for (j=0; j < width; j++)
+			cells[i][j] = new Cell(CELL_TYPE_FREE);
 	}
 
 	// add mines at random on the map
-	for (unsigned i=0; i < bombs; i++) {
-		cells[rand() % width][rand() % height] = new Cell(CELL_TYPE_MINE);
-	}
+	for (i=0; i < mines; i++) {
+		x = rand() % width;
+		y = rand() % height;
 
-	// the rest of the cells are free
-	for (i=0; i < width; i++)
-		for (j=0; j < height; j++)
-			if (NULL == cells[i][j])
-				// Sorry for using more than 3 tabs, Linus
-				cells[i][j] = new Cell(CELL_TYPE_FREE);
+		if (cells[y][x]->getType() == CELL_TYPE_MINE)
+			continue;
+
+		cells[y][x]->setType(CELL_TYPE_MINE);
+
+		for (Cell* cellAround : this->getCellsAround(x, y))
+			cellAround->minesAround++;
+	}
+}
+
+vector<Cell*> Board::getCellsAround(unsigned x, unsigned y) {
+	vector<Cell*> cellsAround;
+	// SIDES
+	// left
+	if (x > 0) cellsAround.push_back(this->cells[y][x - 1]);
+	// right
+	if (x < this->width - 1) cellsAround.push_back(this->cells[y][x + 1]);
+	// top
+	if (y > 0) cellsAround.push_back(this->cells[y - 1][x]);
+	// bottom
+	if (y < this->width - 1) cellsAround.push_back(this->cells[y + 1][x]);
+	// CORNERS
+	// top left
+	if (x > 0 && y > 0) cellsAround.push_back(this->cells[y - 1][x - 1]);
+	// bottom left
+	if (x > 0 && y < height - 1) cellsAround.push_back(this->cells[y + 1][x - 1]);
+	// top right
+	if (x < width - 1 && y > 0) cellsAround.push_back(this->cells[y - 1][x + 1]);
+	// bottom right
+	if (x < width - 1 && y < height - 1) cellsAround.push_back(this->cells[y + 1][x + 1]);
+
+	return cellsAround;
 }
 
 /* Board::show
@@ -63,14 +94,17 @@ void Board::show(void) {
 
 	// print board
 	for (i=0; i < this->height; i++){
-		cout << (char)('A' + i) << "┃";
+		cout << i + 1 << "┃";
 		for (j=0; j< this->width; j++) {
 			switch (cells[i][j]->getType()) {
 			case CELL_TYPE_FREE:
-				if (cells[i][j]->isRevealed())
-					cout << "░";
-				else
+				if (cells[i][j]->isRevealed()) {
+					if (cells[i][j]->minesAround)
+						cout << cells[i][j]->minesAround;
+					else cout << "░";
+				} else {
 					cout << "▓";
+				}
 				break;
 			case CELL_TYPE_MINE:
 				if (cells[i][j]->isRevealed())
@@ -90,25 +124,37 @@ void Board::show(void) {
 	cout << "┛" << endl;
 }
 
+// Here is where most of the magic happens
 Cell* Board::revealCellAt(unsigned x, unsigned y) {
-	cells[x][y]->reveal();
-	return cells[x][y];
+	cells[y][x]->reveal();
+
+	// game over, buddy
+	if (cells[y][x]->getType() == CELL_TYPE_MINE)
+		return cells[y][x];
+
+	// if there are no mines around this cell
+	if (cells[y][x]->minesAround == 0) {
+		for (Cell* cell : getCellsAround(x, y))
+			cell->reveal();
+	}
+
+	return cells[y][x];
 }
 
 void Board::revealAllCells(void) {
 	unsigned i;
 	unsigned j;
 
-	for (i=0; i < this->width; i++)
-		for (j=0; j < this->height; j++)
-			this->revealCellAt(i, j);
+	for (i=0; i < this->height; i++)
+		for (j=0; j < this->width; j++)
+			cells[i][j]->reveal();
 }
 
 Board::~Board() {
 	unsigned i;
 	unsigned j;
 
-	for (i=0; i < this->width; i++)
-		for (j=0; j < this->height; j++)
+	for (i=0; i < this->height; i++)
+		for (j=0; j < this->width; j++)
 			delete cells[i][j];
 }

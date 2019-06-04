@@ -8,8 +8,10 @@ class Cell {
 		bool revealed;
 		int type;
 	public:
+		unsigned minesAround;
 		Cell(int);
 		void reveal(void);
 		int getType(void);
+		void setType(int);
 		bool isRevealed(void);
 };
